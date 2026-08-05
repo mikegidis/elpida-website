@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Boxes,
   Gauge,
@@ -9,6 +9,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { AdminUser } from '../../api/adminAuth';
+import { AdminCategoriesPage } from './AdminCategoriesPage';
 
 type AdminDashboardProps = {
   admin: AdminUser;
@@ -23,7 +24,11 @@ const menuItems = [
   { label: 'Settings', icon: Settings },
 ];
 
+type AdminPage = typeof menuItems[number]['label'];
+
 export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
+  const [activePage, setActivePage] = useState<AdminPage>('Dashboard');
+
   return (
     <div className="min-h-screen bg-[#F7F3EE] text-[#2D1424]">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-[#E4DAD2] bg-white lg:block">
@@ -41,12 +46,13 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
           <div className="space-y-1">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
-              const isActive = index === 0;
+              const isActive = activePage === item.label;
 
               return (
                 <button
                   key={item.label}
                   type="button"
+                  onClick={() => setActivePage(item.label)}
                   className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium transition ${
                     isActive
                       ? 'bg-[#2D1424] text-white'
@@ -74,8 +80,8 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-[#E4DAD2] bg-white px-4 sm:px-6">
           <div>
-            <h1 className="text-lg font-semibold">Dashboard</h1>
-            <p className="text-xs text-[#7C6B73]">Admin foundation</p>
+            <h1 className="text-lg font-semibold">{activePage}</h1>
+            <p className="text-xs text-[#7C6B73]">Admin dashboard</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
@@ -93,21 +99,27 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
         </header>
 
         <main className="p-4 sm:p-6">
-          <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {['Categories', 'Products', 'Orders', 'Settings'].map((label) => (
-              <section key={label} className="rounded-lg border border-[#E4DAD2] bg-white p-4">
-                <p className="text-sm font-medium text-[#7C6B73]">{label}</p>
-                <p className="mt-2 text-2xl font-semibold">--</p>
-              </section>
-            ))}
-          </div>
+          {activePage === 'Categories' ? (
+            <AdminCategoriesPage />
+          ) : (
+            <>
+              <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {['Categories', 'Products', 'Orders', 'Settings'].map((label) => (
+                  <section key={label} className="rounded-lg border border-[#E4DAD2] bg-white p-4">
+                    <p className="text-sm font-medium text-[#7C6B73]">{label}</p>
+                    <p className="mt-2 text-2xl font-semibold">--</p>
+                  </section>
+                ))}
+              </div>
 
-          <section className="rounded-lg border border-[#E4DAD2] bg-white p-5">
-            <h2 className="text-base font-semibold">Main Content Area</h2>
-            <p className="mt-2 text-sm text-[#6E5E67]">
-              CRUD screens will be added here later. This dashboard currently provides the protected admin shell only.
-            </p>
-          </section>
+              <section className="rounded-lg border border-[#E4DAD2] bg-white p-5">
+                <h2 className="text-base font-semibold">Main Content Area</h2>
+                <p className="mt-2 text-sm text-[#6E5E67]">
+                  CRUD screens will be added here later. This dashboard currently provides the protected admin shell only.
+                </p>
+              </section>
+            </>
+          )}
         </main>
       </div>
     </div>
