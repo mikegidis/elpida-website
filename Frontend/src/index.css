@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  body {
+    background-color: #3A1A2E;
+    color: #E8D6D2;
+    font-family: 'Plus Jakarta Sans', Calibri, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .font-serif-editorial {
+    font-family: 'Georgia', 'Cambria', 'Cinzel', serif;
+  }
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #2D1424;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9A227;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E5B82E;
+}
+
+/* Frosted Glass Theme System for Elpida (Deep Aubergine + Gold + Rose) */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(232, 214, 210, 0.12);
+}
+
+.glass-heavy {
+  background: rgba(45, 20, 36, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.glass-nav {
+  background: rgba(45, 20, 36, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(232, 214, 210, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(201, 162, 39, 0.5);
+  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.6), 0 0 20px 0 rgba(201, 162, 39, 0.2);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(232, 214, 210, 0.2);
+  color: #E8D6D2;
+}
+.glass-input:focus {
+  border-color: #C9A227;
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+}
+
+.glass-modal {
+  background: rgba(45, 20, 36, 0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px 0 rgba(201, 162, 39, 0.18);
+}
+
+/* Elpida Palette Utility Classes */
+.accent-gold {
+  color: #C9A227;
+}
+
+.bg-gold {
+  background-color: #C9A227;
+}
+
+.border-gold {
+  border-color: #C9A227;
+}
+
+/* Backward compatibility mapping for accent-olive / bg-olive to gold */
+.accent-olive {
+  color: #C9A227;
+}
+
+.bg-olive {
+  background-color: #C9A227;
+}
+
+.border-olive {
+  border-color: #C9A227;
+}
+
+.text-rose {
+  color: #B98089;
+}
+
+.bg-rose {
+  background-color: #B98089;
+}
+
+.border-rose {
+  border-color: #B98089;
+}
+
+.text-blush {
+  color: #E8D6D2;
+}
+
+.bg-blush {
+  background-color: #E8D6D2;
+}
+
+.bg-aubergine {
+  background-color: #3A1A2E;
+}
+
+.bg-aubergine-dark {
+  background-color: #2D1424;
+}
+
+.bg-aubergine-light {
+  background-color: #4A233D;
+}
+
+.bg-charcoal {
+  background-color: #2D1424;
+}
+
+.letter-spacing-wide {
+  letter-spacing: 0.3em;
+}
+
+
+
