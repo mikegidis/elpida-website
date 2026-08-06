@@ -25,27 +25,18 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
   wishlistIds,
 }) => {
   const { categories: apiCategories, loading: categoriesLoading, error: categoriesError } = useCategories();
-  const [activeCategory, setActiveCategory] = useState<Category>('all');
+  const [activeCategory, setActiveCategory] = useState<number | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'rating'>('featured');
   const [priceMax, setPriceMax] = useState<number>(300);
 
-  const mapCategoryName = (name: string): Category => {
-    const normalized = name.toLowerCase().replace(/\s+/g, '');
-    if (normalized.includes('fragrance')) return 'fragrances';
-    if (normalized.includes('skin')) return 'skincare';
-    if (normalized.includes('hair')) return 'haircare';
-    if (normalized.includes('cosmetic')) return 'cosmetics';
-    return 'skincare';
-  };
-
   const categories = useMemo(() => {
-    const baseCategories: { id: Category; label: string }[] = [
+    const baseCategories: { id: number | 'all'; label: string }[] = [
       { id: 'all', label: 'All Formulations' }
     ];
 
     const mapped = apiCategories.map(cat => ({
-      id: mapCategoryName(cat.name),
+      id: cat.id,
       label: cat.name
     }));
 
@@ -55,7 +46,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
-        const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+        const matchesCategory = activeCategory === 'all' || p.categoryId === activeCategory;
         const matchesSearch =
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||

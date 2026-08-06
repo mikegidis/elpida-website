@@ -6,6 +6,7 @@ const categoryRoutes = require("./features/categories/category.routes");
 const productRoutes = require("./features/products/product.routes");
 const orderRoutes = require("./features/orders/order.routes");
 const adminRoutes = require("./features/admin/admin.routes");
+const variantRoutes = require("./features/variants/variant.routes");
 const app = express();
 
 // Allow requests from the frontend
@@ -24,4 +25,5 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/variants", variantRoutes);
 module.exports = app;

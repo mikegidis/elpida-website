@@ -19,6 +19,7 @@ interface ApiProduct {
   name: string;
   description: string;
   image_url: string;
+  is_active?: boolean;
   category: ApiCategory;
   variants: ApiVariant[];
 }
@@ -27,6 +28,23 @@ interface ApiProductsResponse {
   success: boolean;
   count: number;
   data: ApiProduct[];
+}
+
+export interface AdminProduct {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string | null;
+  is_active: boolean;
+  category: ApiCategory;
+}
+
+export interface ProductInput {
+  name: string;
+  description: string;
+  category_id: number;
+  image_url: string;
+  is_active: boolean;
 }
 
 function mapCategoryName(name: string): Product['category'] {
@@ -54,6 +72,7 @@ function mapApiProductToProduct(apiProduct: ApiProduct): Product {
     name: apiProduct.name,
     subtitle: apiProduct.category.name,
     category: mapCategoryName(apiProduct.category.name),
+    categoryId: apiProduct.category.id,
     price: basePrice,
     rating: 0,
     reviewsCount: 0,
@@ -66,4 +85,53 @@ function mapApiProductToProduct(apiProduct: ApiProduct): Product {
 export async function fetchProducts(): Promise<Product[]> {
   const response = await apiFetch<ApiProductsResponse>('/products');
   return response.data.map(mapApiProductToProduct);
+}
+
+async function productRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const token = localStorage.getItem('elpida_admin_token');
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || `API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function fetchAdminProducts(): Promise<AdminProduct[]> {
+  const response = await productRequest<{ success: boolean; count: number; data: AdminProduct[] }>('/products?admin=true');
+  return response.data;
+}
+
+export async function createProduct(product: ProductInput): Promise<AdminProduct> {
+  const response = await productRequest<{ success: boolean; data: AdminProduct }>('/products', {
+    method: 'POST',
+    body: JSON.stringify(product),
+  });
+
+  return response.data;
+}
+
+export async function updateProduct(id: number, product: ProductInput): Promise<AdminProduct> {
+  const response = await productRequest<{ success: boolean; data: AdminProduct }>(`/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(product),
+  });
+
+  return response.data;
+}
+
+export async function deleteProduct(id: number): Promise<{ message: string }> {
+  return productRequest<{ success: boolean; message: string }>(`/products/${id}`, {
+    method: 'DELETE',
+  });
 }
