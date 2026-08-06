@@ -12,6 +12,7 @@ async function getAllProducts() {
                 name: row.product_name,
                 description: row.product_description,
                 image_url: row.image_url,
+                is_active: row.is_active,
                 category: {
                     id: row.category_id,
                     name: row.category_name,
@@ -33,6 +34,23 @@ async function getAllProducts() {
     return Array.from(productsMap.values());
 }
 
+async function getAdminProducts() {
+    const rows = await productModel.getAllProductsForAdmin();
+
+    return rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        image_url: row.image_url,
+        is_active: row.is_active,
+        category: {
+            id: row.category_id,
+            name: row.category_name,
+        },
+    }));
+}
+
 module.exports = {
     getAllProducts,
+    getAdminProducts,
 };

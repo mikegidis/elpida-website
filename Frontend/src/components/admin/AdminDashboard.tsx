@@ -7,9 +7,12 @@ import {
   Package,
   Settings,
   ShoppingBag,
+  Layers,
 } from 'lucide-react';
 import { AdminUser } from '../../api/adminAuth';
 import { AdminCategoriesPage } from './AdminCategoriesPage';
+import { AdminProductsPage } from './AdminProductsPage';
+import { AdminVariantsPage } from './AdminVariantsPage';
 
 type AdminDashboardProps = {
   admin: AdminUser;
@@ -20,6 +23,7 @@ const menuItems = [
   { label: 'Dashboard', icon: Gauge },
   { label: 'Categories', icon: LayoutGrid },
   { label: 'Products', icon: Package },
+  { label: 'Variants', icon: Layers },
   { label: 'Orders', icon: ShoppingBag },
   { label: 'Settings', icon: Settings },
 ];
@@ -101,6 +105,10 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
         <main className="p-4 sm:p-6">
           {activePage === 'Categories' ? (
             <AdminCategoriesPage />
+          ) : activePage === 'Products' ? (
+            <AdminProductsPage />
+          ) : activePage === 'Variants' ? (
+            <AdminVariantsPage />
           ) : (
             <>
               <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
