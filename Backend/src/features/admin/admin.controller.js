@@ -1,32 +1,52 @@
 const { signToken } = require("./admin.jwt");
+const bcrypt = require("bcrypt");
 
-const getAdminCredentials = () => ({
-    username: process.env.ADMIN_USERNAME || "admin",
-    password: process.env.ADMIN_PASSWORD || "admin123"
-});
-
-const login = (req, res) => {
-    const { username, password } = req.body;
-    const admin = getAdminCredentials();
-
-    if (username !== admin.username || password !== admin.password) {
-        return res.status(401).json({
-            message: "Invalid admin credentials"
-        });
+const getAdminCredentials = () => {
+    const hash = process.env.ADMIN_PASSWORD_HASH;
+    if (!hash) {
+        console.warn("⚠️ WARNING: ADMIN_PASSWORD_HASH is not set in environment variables!");
     }
+    return {
+        username: process.env.ADMIN_USERNAME || "admin",
+        passwordHash: hash
+    };
+};
 
-    const token = signToken({
-        role: "admin",
-        username: admin.username
-    });
+const login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const admin = getAdminCredentials();
 
-    return res.json({
-        token,
-        admin: {
-            username: admin.username,
-            role: "admin"
+        if (!admin.passwordHash) {
+            return res.status(500).json({ message: "Server configuration error. Admin login disabled." });
         }
-    });
+
+        if (username !== admin.username) {
+            return res.status(401).json({ message: "Invalid admin credentials" });
+        }
+
+        const isMatch = await bcrypt.compare(password, admin.passwordHash);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: "Invalid admin credentials" });
+        }
+
+        const token = signToken({
+            role: "admin",
+            username: admin.username
+        });
+
+        return res.json({
+            token,
+            admin: {
+                username: admin.username,
+                role: "admin"
+            }
+        });
+    } catch (error) {
+        console.error("Login error:", error);
+        return res.status(500).json({ message: "Internal server error during login" });
+    }
 };
 
 const me = (req, res) => {
