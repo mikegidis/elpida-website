@@ -47,6 +47,19 @@ export interface ProductInput {
   is_active: boolean;
 }
 
+// The base URL of the backend server (without /api/v1)
+// Used to resolve relative image paths like /uploads/products/...
+const BACKEND_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '');
+
+// Converts a relative upload path to a full URL, or returns external URLs as-is
+function resolveImageUrl(imageUrl: string | null): string {
+  if (!imageUrl) return '';
+  if (imageUrl.startsWith('/uploads/')) {
+    return `${BACKEND_BASE_URL}${imageUrl}`;
+  }
+  return imageUrl;
+}
+
 function mapCategoryName(name: string): Product['category'] {
   const normalized = name.toLowerCase().replace(/\s+/g, '');
   if (normalized.includes('fragrance')) return 'fragrances';
@@ -77,7 +90,7 @@ function mapApiProductToProduct(apiProduct: ApiProduct): Product {
     rating: 0,
     reviewsCount: 0,
     description: apiProduct.description,
-    image: apiProduct.image_url,
+    image: resolveImageUrl(apiProduct.image_url),
     sizes: sizes.length > 0 ? sizes : [{ label: 'Standard', priceModifier: 0 }],
   };
 }
@@ -135,3 +148,29 @@ export async function deleteProduct(id: number): Promise<{ message: string }> {
     method: 'DELETE',
   });
 }
+
+// Upload a product image file and return the saved path (e.g. /uploads/products/abc.jpg)
+export async function uploadProductImage(file: File): Promise<string> {
+  const token = localStorage.getItem('elpida_admin_token');
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/uploads`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || 'Failed to upload image');
+  }
+
+  const result: { success: boolean; data: { url: string } } = await response.json();
+  return result.data.url;
+}
+
+export { resolveImageUrl };

@@ -1,5 +1,5 @@
-import React, { FormEvent, useEffect, useState } from 'react';
-import { ImageIcon, Pencil, Plus, Trash2, X } from 'lucide-react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
+import { ImageIcon, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
 import { ApiCategory, fetchCategories } from '../../api/categories';
 import {
   AdminProduct,
@@ -7,8 +7,14 @@ import {
   createProduct,
   deleteProduct,
   fetchAdminProducts,
+  resolveImageUrl,
   updateProduct,
+  uploadProductImage,
 } from '../../api/products';
+
+// Allowed image types and max size (5 MB) — validated client-side before upload
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 type ProductFormState = {
   name: string;
@@ -39,6 +45,17 @@ export function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
   const [form, setForm] = useState<ProductFormState>(emptyForm);
 
+  // Image upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Compute the preview URL: local blob for a new file, or resolved URL for existing
+  const imagePreviewUrl = imageFile
+    ? URL.createObjectURL(imageFile)
+    : form.image_url
+      ? resolveImageUrl(form.image_url)
+      : '';
+
   const loadProducts = async () => {
     setLoading(true);
     setError('');
@@ -64,6 +81,7 @@ export function AdminProductsPage() {
   const openCreateModal = () => {
     setEditingProduct(null);
     setForm(emptyForm);
+    setImageFile(null);
     setFormError('');
     setIsModalOpen(true);
   };
@@ -77,6 +95,7 @@ export function AdminProductsPage() {
       image_url: product.image_url || '',
       is_active: product.is_active,
     });
+    setImageFile(null);
     setFormError('');
     setIsModalOpen(true);
   };
@@ -89,7 +108,29 @@ export function AdminProductsPage() {
     setIsModalOpen(false);
     setEditingProduct(null);
     setForm(emptyForm);
+    setImageFile(null);
     setFormError('');
+  };
+
+  // Validate and set the selected image file
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setFormError('Only JPG, PNG and WEBP images are allowed.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setFormError('Image must be smaller than 5 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    setFormError('');
+    setImageFile(file);
   };
 
   const buildPayload = (): ProductInput | null => {
@@ -127,6 +168,12 @@ export function AdminProductsPage() {
     setSaving(true);
 
     try {
+      // If a new image file was selected, upload it first
+      if (imageFile) {
+        const uploadedUrl = await uploadProductImage(imageFile);
+        payload.image_url = uploadedUrl;
+      }
+
       if (editingProduct) {
         await updateProduct(editingProduct.id, payload);
         setSuccess('Product updated successfully.');
@@ -226,7 +273,7 @@ export function AdminProductsPage() {
                     <td className="px-4 py-3">
                       {product.image_url ? (
                         <img
-                          src={product.image_url}
+                          src={resolveImageUrl(product.image_url)}
                           alt={product.name}
                           className="h-12 w-12 rounded-md object-cover"
                         />
@@ -327,14 +374,52 @@ export function AdminProductsPage() {
                 </select>
               </label>
 
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium">Image URL</span>
+              <div className="block">
+                <span className="mb-2 block text-sm font-medium">Product Image</span>
+
+                {/* Image preview */}
+                {imagePreviewUrl ? (
+                  <div className="relative mb-2 inline-block">
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="h-32 w-32 rounded-lg border border-[#D8CCC4] object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageFile(null);
+                        setForm((current) => ({ ...current, image_url: '' }));
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                      className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white shadow hover:bg-red-600"
+                      aria-label="Remove image"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : null}
+
+                {/* File picker */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-[#D8CCC4] px-4 py-5 text-center transition hover:border-[#C9A227] hover:bg-[#FDFBF9]"
+                >
+                  <Upload size={24} className="text-[#6E5E67]" />
+                  <p className="text-sm text-[#6E5E67]">
+                    <span className="font-medium text-[#2D1424]">Click to upload</span> an image
+                  </p>
+                  <p className="text-xs text-[#A39E93]">JPG, PNG or WEBP (max 5 MB)</p>
+                </div>
+
                 <input
-                  value={form.image_url}
-                  onChange={(event) => setForm((current) => ({ ...current, image_url: event.target.value }))}
-                  className="w-full rounded-md border border-[#D8CCC4] px-3 py-2 text-sm outline-none focus:border-[#C9A227]"
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
-              </label>
+              </div>
 
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input

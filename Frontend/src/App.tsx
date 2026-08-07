@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { BrandCarousel } from './components/BrandCarousel';
 import { FeaturedSection } from './components/FeaturedSection';
 import { ShopSection } from './components/ShopSection';
 import { AboutSection } from './components/AboutSection';
@@ -251,6 +252,8 @@ export default function App() {
             onExploreClick={() => handleNavigate('shop')}
             onQuizClick={() => setIsQuizOpen(true)}
           />
+
+          <BrandCarousel />
 
           {/* 2. Featured Bestsellers */}
           <FeaturedSection

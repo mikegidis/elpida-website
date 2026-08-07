@@ -93,8 +93,36 @@ async function getOrder(req, res) {
     }
 }
 
+async function updateStatus(req, res) {
+    try {
+        const orderId = parseInt(req.params.id, 10);
+        const { status } = req.body;
+        
+        const result = await orderService.updateOrderStatus(orderId, status);
+        
+        if (result.error) {
+            return res.status(400).json({
+                success: false,
+                message: result.message,
+            });
+        }
+        
+        return res.status(200).json({
+            success: true,
+            message: "Order status updated successfully",
+        });
+    } catch (error) {
+        console.error("Order Controller Update Status Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update order status.",
+        });
+    }
+}
+
 module.exports = {
     createOrder,
     getOrders,
     getOrder,
+    updateStatus,
 };

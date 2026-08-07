@@ -1,5 +1,24 @@
+const path = require("path");
+const fs = require("fs");
 const productService = require("./product.service");
 const productModel = require("./product.model");
+const { UPLOADS_DIR } = require("../uploads/upload.controller");
+
+// Deletes a locally-uploaded image file if the path starts with /uploads/
+function removeLocalImage(imageUrl) {
+    if (!imageUrl || !imageUrl.startsWith("/uploads/products/")) {
+        return;
+    }
+
+    const filename = path.basename(imageUrl);
+    const filePath = path.join(UPLOADS_DIR, filename);
+
+    fs.unlink(filePath, (err) => {
+        if (err && err.code !== "ENOENT") {
+            console.error("Failed to delete old image:", err.message);
+        }
+    });
+}
 
 async function getProducts(req, res) {
     try {
@@ -87,6 +106,9 @@ async function updateProduct(req, res) {
     }
 
     try {
+        // Fetch the current product to compare images
+        const existing = await productModel.getProductById(req.params.id);
+
         const product = await productModel.updateProduct(req.params.id, productInput);
 
         if (!product) {
@@ -94,6 +116,11 @@ async function updateProduct(req, res) {
                 success: false,
                 message: "Product not found",
             });
+        }
+
+        // If the image changed, delete the old uploaded file
+        if (existing && existing.image_url && existing.image_url !== productInput.imageUrl) {
+            removeLocalImage(existing.image_url);
         }
 
         return res.json({
@@ -120,6 +147,9 @@ async function deleteProduct(req, res) {
                 message: "Product not found",
             });
         }
+
+        // Clean up the uploaded image file
+        removeLocalImage(deleted.image_url);
 
         return res.json({
             success: true,

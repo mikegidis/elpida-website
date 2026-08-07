@@ -111,8 +111,28 @@ async function getOrderDetail(orderId) {
     return await orderModel.getOrderWithItems(orderId);
 }
 
+async function updateOrderStatus(orderId, status) {
+    if (!orderId || isNaN(orderId)) {
+        return { error: true, message: "Invalid order ID" };
+    }
+    
+    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+        return { error: true, message: "Invalid order status" };
+    }
+
+    const updated = await orderModel.updateOrderStatus(orderId, status);
+    
+    if (!updated) {
+        return { error: true, message: "Order not found" };
+    }
+    
+    return { success: true };
+}
+
 module.exports = {
     placeOrder,
     getOrdersList,
     getOrderDetail,
+    updateOrderStatus,
 };

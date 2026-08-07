@@ -44,6 +44,16 @@ async function getAllProductsForAdmin() {
     return result.rows;
 }
 
+async function getProductById(id) {
+    const result = await pool.query(`
+        SELECT id, name, description, image_url, is_active, category_id
+        FROM products
+        WHERE id = $1;
+    `, [id]);
+
+    return result.rows[0] || null;
+}
+
 async function createProduct({ name, description, categoryId, imageUrl, isActive }) {
     const result = await pool.query(`
         INSERT INTO products (name, description, category_id, image_url, is_active)
@@ -73,15 +83,16 @@ async function deleteProduct(id) {
     const result = await pool.query(`
         DELETE FROM products
         WHERE id = $1
-        RETURNING id;
+        RETURNING id, image_url;
     `, [id]);
 
-    return result.rowCount > 0;
+    return result.rows[0] || null;
 }
 
 module.exports = {
     getAllActiveProducts,
     getAllProductsForAdmin,
+    getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
