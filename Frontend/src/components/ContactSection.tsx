@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, CheckCircle, Sparkles, Building2 } from 'lucide-react';
 
+import { submitContactMessage } from '../api/contactApi';
+
 interface ContactSectionProps {
   onShowToast: (title: string, description: string) => void;
 }
@@ -17,20 +19,27 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError(null);
+    try {
+      await submitContactMessage(formData);
       setSubmitted(true);
       onShowToast(
         'Wholesale Inquiry Sent to Elpida',
         'Our Cairo distribution manager will reach out within 24 hours.'
       );
-    }, 800);
+    } catch (err) {
+      console.error('Submission failed:', err);
+      setError('Failed to send inquiry. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -168,6 +177,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
                     className="w-full px-4 py-3 bg-[#3A1A2E] border border-[#E8D6D2]/20 rounded-xl text-sm text-[#E8D6D2] placeholder-[#E8D6D2]/40 focus:outline-none focus:border-[#C9A227]"
                   />
                 </div>
+
+                {error && (
+                  <div className="p-4 rounded-xl bg-red-900/20 border border-red-500/50 text-red-200 text-sm">
+                    {error}
+                  </div>
+                )}
 
                 <button
                   type="submit"
