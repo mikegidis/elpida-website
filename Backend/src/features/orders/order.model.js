@@ -94,6 +94,17 @@ async function getOrderWithItems(orderId) {
     };
 }
 
+async function updateOrderStatus(orderId, status) {
+    const result = await pool.query(`
+        UPDATE orders
+        SET status = $1
+        WHERE id = $2
+        RETURNING id;
+    `, [status, orderId]);
+
+    return result.rowCount > 0;
+}
+
 module.exports = {
     getDbClient,
     getVariantDetails,
@@ -102,4 +113,5 @@ module.exports = {
     updateVariantStock,
     getAllOrders,
     getOrderWithItems,
+    updateOrderStatus,
 };

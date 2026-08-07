@@ -13,6 +13,7 @@ import { AdminUser } from '../../api/adminAuth';
 import { AdminCategoriesPage } from './AdminCategoriesPage';
 import { AdminProductsPage } from './AdminProductsPage';
 import { AdminVariantsPage } from './AdminVariantsPage';
+import { AdminOrdersPage } from './AdminOrdersPage';
 
 type AdminDashboardProps = {
   admin: AdminUser;
@@ -109,6 +110,8 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
             <AdminProductsPage />
           ) : activePage === 'Variants' ? (
             <AdminVariantsPage />
+          ) : activePage === 'Orders' ? (
+            <AdminOrdersPage />
           ) : (
             <>
               <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
