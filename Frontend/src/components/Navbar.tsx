@@ -11,6 +11,7 @@ interface NavbarProps {
   onOpenWishlist: () => void;
   onOpenSearch: () => void;
   onOpenQuiz: () => void;
+  settings?: any; // or import { Settings } from '../api/settings';
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -22,6 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenWishlist,
   onOpenSearch,
   onOpenQuiz,
+  settings,
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -93,7 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Brand Logo */}
           <div className="text-center cursor-pointer" onClick={() => handleLinkClick('home')}>
             <h1 className="font-serif-editorial text-2xl sm:text-3xl md:text-4xl tracking-[0.25em] font-light text-[#E8D6D2]">
-              ELPIDA
+              {settings?.site_name ? settings.site_name.toUpperCase() : 'ELPIDA'}
             </h1>
             <p className="text-[9px] uppercase tracking-[0.35em] text-[#C9A227] -mt-1 font-medium hidden sm:block">
               Personal Care & Fragrance Wholesaler

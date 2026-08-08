@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowDownRight, Building2, Award } from 'lucide-react';
-import { heroImg } from '../data/products';
+import heroImg from '../assets/images/special_glow_hero_1785434567085.jpg';
 
 interface HeroProps {
   onExploreClick: () => void;

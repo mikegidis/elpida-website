@@ -20,7 +20,6 @@ export function AdminMessagesPage() {
       const data = await fetchAdminMessages(token);
       setMessages(data);
     } catch (err) {
-      console.error(err);
       setError('Failed to load contact messages');
     } finally {
       setLoading(false);
@@ -44,7 +43,6 @@ export function AdminMessagesPage() {
         setSelectedMessage({ ...selectedMessage, status: updatedMessage.status });
       }
     } catch (err) {
-      console.error(err);
       alert('Failed to update message status');
     }
   };

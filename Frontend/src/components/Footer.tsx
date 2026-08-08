@@ -5,9 +5,10 @@ import { ArrowRight, Sparkles, Check, Instagram, Facebook, Globe, MapPin, Phone,
 interface FooterProps {
   onShowToast: (title: string, description: string) => void;
   onNavigate: (section: string) => void;
+  settings?: any; // or import { Settings } from '../api/settings';
 }
 
-export const Footer: React.FC<FooterProps> = ({ onShowToast, onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onShowToast, onNavigate, settings }) => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -77,16 +78,29 @@ export const Footer: React.FC<FooterProps> = ({ onShowToast, onNavigate }) => {
           {/* Brand info */}
           <div className="md:col-span-2 space-y-4">
             <h2 className="font-serif-editorial text-2xl tracking-[0.2em] text-[#E8D6D2]">
-              ELPIDA
+              {settings?.site_name ? settings.site_name.toUpperCase() : 'ELPIDA'}
             </h2>
-            <p className="text-xs text-[#E8D6D2]/70 max-w-sm font-light leading-relaxed">
-              Personal Care & Fragrance Distributor and Wholesaler in Cairo, Egypt. Providing high-demand skincare, haircare, and fine fragrance products to traders, pharmacies, and supermarkets nationwide.
+            <p className="text-xs text-[#E8D6D2]/70 max-w-sm font-light leading-relaxed whitespace-pre-wrap">
+              {settings?.site_description || 'Personal Care & Fragrance Distributor and Wholesaler in Cairo, Egypt. Providing high-demand skincare, haircare, and fine fragrance products to traders, pharmacies, and supermarkets nationwide.'}
             </p>
 
             <div className="space-y-1.5 text-xs text-[#E8D6D2]/90 pt-2">
-              <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#C9A227]" /> Cairo, Egypt</p>
-              <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#C9A227]" /> +20 128 524 1627</p>
-              <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[#C9A227]" /> mikegidis@gmail.com</p>
+              <p className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-[#C9A227]" /> {settings?.address || 'Cairo, Egypt'}</p>
+              <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-[#C9A227]" /> {settings?.phone || '+20 128 524 1627'}</p>
+              <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-[#C9A227]" /> {settings?.contact_email || 'mikegidis@gmail.com'}</p>
+            </div>
+            
+            <div className="flex items-center gap-4 pt-4">
+              {settings?.facebook_url && (
+                <a href={settings.facebook_url} target="_blank" rel="noreferrer" className="text-[#E8D6D2]/70 hover:text-[#C9A227] transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+              )}
+              {settings?.instagram_url && (
+                <a href={settings.instagram_url} target="_blank" rel="noreferrer" className="text-[#E8D6D2]/70 hover:text-[#C9A227] transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -124,10 +138,10 @@ export const Footer: React.FC<FooterProps> = ({ onShowToast, onNavigate }) => {
 
         {/* Bottom Bar */}
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#E8D6D2]/60 gap-4">
-          <p>© {new Date().getFullYear()} Elpida Personal Care & Fragrance Distributor. Cairo, Egypt. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {settings?.site_name || 'Elpida Personal Care & Fragrance Distributor'}. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1"><Globe className="w-3 h-3 text-[#C9A227]" /> (EGP)</span>
-            <a href="#privacy" className="hover:text-[#E8D6D2] transition-colors">Privacy Policy</a>
+            <a href="/privacy-policy" className="hover:text-[#E8D6D2] transition-colors">Privacy Policy</a>
             <a href="#terms" className="hover:text-[#E8D6D2] transition-colors">Trade Terms</a>
           </div>
         </div>

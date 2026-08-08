@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash2, ShoppingBag, ArrowRight, ShieldCheck, Tag, Check, Sparkles } from 'lucide-react';
 import { CartItem } from '../types';
 import { submitOrder } from '../api/orders';
+import { Settings } from '../api/settings';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CartDrawerProps {
   onUpdateQuantity: (cartItemId: string, delta: number) => void;
   onRemoveItem: (cartItemId: string) => void;
   onClearCart: () => void;
+  settings?: Settings | null;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -20,6 +22,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity,
   onRemoveItem,
   onClearCart,
+  settings,
 }) => {
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -104,9 +107,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       } else {
         setSubmitError(response.message || 'Unable to submit order.');
       }
-    } catch (err: any) {
-      console.error(err);
-      setSubmitError(err.message || 'Network error or server unavailable.');
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to submit order');
     } finally {
       setIsSubmitting(false);
     }
@@ -372,25 +374,37 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               )}
 
               {/* Checkout Button */}
-              <button
-                onClick={handleCheckout}
-                disabled={isSubmitting}
-                className={`w-full bg-[#C9A227] hover:bg-[#E5B82E] text-[#3A1A2E] py-4 rounded-2xl text-xs uppercase tracking-[0.2em] font-bold transition-all shadow-xl flex items-center justify-center gap-2 group ${
-                  isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#3A1A2E] border-t-transparent rounded-full animate-spin" />
-                    <span>Submitting Order...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Submit Wholesale Order</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
+              {settings && settings.orders_enabled === false ? (
+                <div className="text-center p-3 rounded-xl border border-red-500/30 bg-red-950/20">
+                  <p className="text-xs text-red-400 font-medium mb-1">Orders Temporarily Unavailable</p>
+                  <p className="text-[10px] text-red-400/80">We are currently not accepting new orders. Please check back later.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-[10px] text-[#E8D6D2]/60 font-light leading-relaxed">
+                    By submitting this order, you acknowledge that the provided information will be used to process and respond to your order in accordance with our <a href="/privacy-policy" className="text-[#C9A227] hover:underline">Privacy Policy</a>.
+                  </div>
+                  <button
+                  onClick={handleCheckout}
+                  disabled={isSubmitting}
+                  className={`w-full bg-[#C9A227] hover:bg-[#E5B82E] text-[#3A1A2E] py-4 rounded-2xl text-xs uppercase tracking-[0.2em] font-bold transition-all shadow-xl flex items-center justify-center gap-2 group ${
+                    isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[#3A1A2E] border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting Order...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit Wholesale Order</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </div>
+              )}
             </div>
           )}
         </motion.div>

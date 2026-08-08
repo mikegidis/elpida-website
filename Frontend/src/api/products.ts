@@ -100,33 +100,13 @@ export async function fetchProducts(): Promise<Product[]> {
   return response.data.map(mapApiProductToProduct);
 }
 
-async function productRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('elpida_admin_token');
-
-  const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || `API error: ${response.status} ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
 export async function fetchAdminProducts(): Promise<AdminProduct[]> {
-  const response = await productRequest<{ success: boolean; count: number; data: AdminProduct[] }>('/products?admin=true');
+  const response = await apiFetch<{ success: boolean; count: number; data: AdminProduct[] }>('/products?admin=true');
   return response.data;
 }
 
 export async function createProduct(product: ProductInput): Promise<AdminProduct> {
-  const response = await productRequest<{ success: boolean; data: AdminProduct }>('/products', {
+  const response = await apiFetch<{ success: boolean; data: AdminProduct }>('/products', {
     method: 'POST',
     body: JSON.stringify(product),
   });
@@ -135,7 +115,7 @@ export async function createProduct(product: ProductInput): Promise<AdminProduct
 }
 
 export async function updateProduct(id: number, product: ProductInput): Promise<AdminProduct> {
-  const response = await productRequest<{ success: boolean; data: AdminProduct }>(`/products/${id}`, {
+  const response = await apiFetch<{ success: boolean; data: AdminProduct }>(`/products/${id}`, {
     method: 'PUT',
     body: JSON.stringify(product),
   });
@@ -144,32 +124,21 @@ export async function updateProduct(id: number, product: ProductInput): Promise<
 }
 
 export async function deleteProduct(id: number): Promise<{ message: string }> {
-  return productRequest<{ success: boolean; message: string }>(`/products/${id}`, {
+  return apiFetch<{ success: boolean; message: string }>(`/products/${id}`, {
     method: 'DELETE',
   });
 }
 
 // Upload a product image file and return the saved path (e.g. /uploads/products/abc.jpg)
 export async function uploadProductImage(file: File): Promise<string> {
-  const token = localStorage.getItem('elpida_admin_token');
-
   const formData = new FormData();
   formData.append('image', file);
 
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/uploads`, {
+  const result = await apiFetch<{ success: boolean; data: { url: string } }>('/uploads', {
     method: 'POST',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
     body: formData,
   });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || 'Failed to upload image');
-  }
-
-  const result: { success: boolean; data: { url: string } } = await response.json();
+  
   return result.data.url;
 }
 

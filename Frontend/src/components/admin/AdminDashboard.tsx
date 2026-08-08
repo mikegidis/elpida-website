@@ -24,6 +24,7 @@ import { ApiCategory, fetchCategories } from '../../api/categories';
 import { AdminProduct, fetchAdminProducts } from '../../api/products';
 import { AdminVariant, fetchAdminVariants } from '../../api/variants';
 import { AdminOrder, fetchAdminOrders } from '../../api/orders';
+import { AdminSettingsPage } from './AdminSettingsPage';
 
 type AdminDashboardProps = {
   admin: AdminUser;
@@ -68,8 +69,7 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
       setVariants(varData);
       setOrders(orderData);
     } catch (err) {
-      console.error(err);
-      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -180,12 +180,7 @@ export function AdminDashboard({ admin, onLogout }: AdminDashboardProps) {
           ) : activePage === 'Messages' ? (
             <AdminMessagesPage />
           ) : activePage === 'Settings' ? (
-            <section className="rounded-lg border border-[#E4DAD2] bg-white p-5">
-              <h2 className="text-base font-semibold">Settings</h2>
-              <p className="mt-2 text-sm text-[#6E5E67]">
-                Settings and configuration controls will go here.
-              </p>
-            </section>
+            <AdminSettingsPage />
           ) : (
             // ActivePage is Dashboard
             <>

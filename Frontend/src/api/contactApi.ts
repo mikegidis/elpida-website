@@ -1,6 +1,5 @@
 import { ContactMessage } from "../types";
-
-const API_URL = "http://localhost:5000/api/v1";
+import { apiFetch } from "./api";
 
 export async function submitContactMessage(data: {
   name: string;
@@ -9,33 +8,18 @@ export async function submitContactMessage(data: {
   businessType?: string;
   message: string;
 }): Promise<ContactMessage> {
-  const response = await fetch(`${API_URL}/messages`, {
+  return apiFetch<ContactMessage>('/messages', {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(data),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to submit contact message");
-  }
-
-  return response.json();
 }
 
 export async function fetchAdminMessages(token: string): Promise<ContactMessage[]> {
-  const response = await fetch(`${API_URL}/messages`, {
+  return apiFetch<ContactMessage[]>('/messages', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch contact messages");
-  }
-
-  return response.json();
 }
 
 export async function updateAdminMessageStatus(
@@ -43,18 +27,11 @@ export async function updateAdminMessageStatus(
   status: "Unread" | "Read" | "Archived",
   token: string
 ): Promise<ContactMessage> {
-  const response = await fetch(`${API_URL}/messages/${id}/status`, {
+  return apiFetch<ContactMessage>(`/messages/${id}/status`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ status }),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to update message status");
-  }
-
-  return response.json();
 }
