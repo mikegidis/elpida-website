@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ChevronDown, Award, MapPin, Phone, Building2, PackageCheck, ShieldCheck, HeartHandshake, Store } from 'lucide-react';
-import { atelierImg } from '../data/products';
+import atelierImg from '../assets/images/special_glow_atelier_1785434602713.jpg';
 
 export const AboutSection: React.FC = () => {
   const [openPillarId, setOpenPillarId] = useState<string>('pillar-1');

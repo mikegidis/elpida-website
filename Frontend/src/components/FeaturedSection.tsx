@@ -3,10 +3,11 @@ import { motion } from 'motion/react';
 import { Product } from '../types';
 import { ProductCard } from './ProductCard';
 import { Sparkles, ArrowRight, ShieldCheck, Leaf, Droplets } from 'lucide-react';
-import { atelierImg } from '../data/products';
+import atelierImg from '../assets/images/special_glow_atelier_1785434602713.jpg';
 
 interface FeaturedSectionProps {
   products: Product[];
+  loading?: boolean;
   onQuickAdd: (product: Product) => void;
   onSelect: (product: Product) => void;
   onToggleWishlist: (product: Product) => void;
@@ -16,6 +17,7 @@ interface FeaturedSectionProps {
 
 export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   products,
+  loading = false,
   onQuickAdd,
   onSelect,
   onToggleWishlist,
@@ -66,18 +68,25 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredProducts.slice(0, 4).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onQuickAdd={onQuickAdd}
-              onSelect={onSelect}
-              onToggleWishlist={onToggleWishlist}
-              isWishlisted={wishlistIds.includes(product.id)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="inline-block w-8 h-8 border-2 border-[#6B8E23] border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-sm text-[#A39E93] font-light">Curating collection...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredProducts.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onQuickAdd={onQuickAdd}
+                onSelect={onSelect}
+                onToggleWishlist={onToggleWishlist}
+                isWishlisted={wishlistIds.includes(product.id)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* View All Button */}
         <div className="mt-12 text-center">

@@ -12,6 +12,7 @@ const adminRoutes = require("./features/admin/admin.routes");
 const variantRoutes = require("./features/variants/variant.routes");
 const uploadRoutes = require("./features/uploads/upload.routes");
 const messageRoutes = require("./features/messages/message.routes");
+const settingsRoutes = require("./features/settings/settings.routes");
 
 const app = express();
 
@@ -58,5 +59,6 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/variants", variantRoutes);
 app.use("/api/v1/uploads", uploadRoutes);
 app.use("/api/v1/messages", messageRoutes);
+app.use("/api/v1/settings", settingsRoutes);
 
 module.exports = app;

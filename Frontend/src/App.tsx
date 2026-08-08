@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { BrandCarousel } from './components/BrandCarousel';
@@ -15,17 +16,22 @@ import { ScentQuizModal } from './components/ScentQuizModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminLogin } from './components/admin/AdminLogin';
+import { PrivacyPolicyPage } from './components/PrivacyPolicyPage';
 import { AdminUser, getCurrentAdmin } from './api/adminAuth';
+import { getSettings, Settings } from './api/settings';
 
 import { useProducts } from './hooks/useProducts';
 import { Product, CartItem, SizeOption, Shade } from './types';
 
 export default function App() {
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathname = location.pathname;
+  
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [adminAuthLoading, setAdminAuthLoading] = useState(true);
   const { products, loading, error } = useProducts();
-  const [activeSection, setActiveSection] = useState('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -49,17 +55,6 @@ export default function App() {
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  // Scroll/Navigation
-  const handleNavigate = (sectionId: string) => {
-    setActiveSection(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   // Cart operations
@@ -137,16 +132,9 @@ export default function App() {
 
   const totalCartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const navigateTo = (path: string) => {
-    window.history.pushState({}, '', path);
-    setPathname(path);
-  };
-
   useEffect(() => {
-    const handlePopState = () => setPathname(window.location.pathname);
-    window.addEventListener('popstate', handlePopState);
-
-    return () => window.removeEventListener('popstate', handlePopState);
+    // Fetch public settings on mount
+    getSettings().then((data) => setSettings(data)).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -162,7 +150,7 @@ export default function App() {
       setAdminAuthLoading(false);
 
       if (pathname !== '/admin/login') {
-        navigateTo('/admin/login');
+        navigate('/admin/login');
       }
 
       return;
@@ -181,7 +169,7 @@ export default function App() {
         setAdminAuthLoading(false);
 
         if (pathname === '/admin/login') {
-          navigateTo('/admin');
+          navigate('/admin');
         }
       })
       .catch(() => {
@@ -192,22 +180,22 @@ export default function App() {
         localStorage.removeItem('elpida_admin_token');
         setAdmin(null);
         setAdminAuthLoading(false);
-        navigateTo('/admin/login');
+        navigate('/admin/login');
       });
 
     return () => {
       isActive = false;
     };
-  }, [pathname]);
+  }, [pathname, navigate]);
 
   const handleAdminLogin = () => {
-    navigateTo('/admin');
+    navigate('/admin');
   };
 
   const handleAdminLogout = () => {
     localStorage.removeItem('elpida_admin_token');
     setAdmin(null);
-    navigateTo('/admin/login');
+    navigate('/admin/login');
   };
 
   if (pathname.startsWith('/admin')) {
@@ -230,6 +218,22 @@ export default function App() {
     return <AdminDashboard admin={admin} onLogout={handleAdminLogout} />;
   }
 
+  // Active section for navbar based on pathname
+  let activeSection = 'home';
+  if (pathname === '/about') activeSection = 'about';
+  if (pathname === '/shop') activeSection = 'shop';
+  if (pathname === '/contact') activeSection = 'contact';
+  
+  // Custom navigation wrapper for navbar/footer
+  const handleNavigate = (pathOrId: string) => {
+    // If it's a known route name from the original layout
+    if (pathOrId === 'home') navigate('/');
+    else if (pathOrId === 'about') navigate('/about');
+    else if (pathOrId === 'shop') navigate('/shop');
+    else if (pathOrId === 'contact') navigate('/contact');
+    else navigate(pathOrId); // fallback
+  };
+
   return (
     <div className="min-h-screen bg-[#2D1424] text-[#E8D6D2] selection:bg-[#C9A227] selection:text-[#3A1A2E]">
       {/* Navbar */}
@@ -242,54 +246,71 @@ export default function App() {
         onOpenWishlist={() => setIsWishlistOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenQuiz={() => setIsQuizOpen(true)}
+        settings={settings}
       />
 
-      {/* Main Sections */}
+      {/* Main Routed Content */}
       <main>
-        {/* 1. Home / Hero */}
-        <div id="home">
-          <Hero
-            onExploreClick={() => handleNavigate('shop')}
-            onQuizClick={() => setIsQuizOpen(true)}
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <div id="home">
+                <Hero
+                  onExploreClick={() => handleNavigate('shop')}
+                  onQuizClick={() => setIsQuizOpen(true)}
+                />
+                <BrandCarousel />
+                <FeaturedSection
+                  products={products}
+                  loading={loading}
+                  onQuickAdd={handleQuickAdd}
+                  onSelect={(p) => setSelectedProduct(p)}
+                  onToggleWishlist={handleToggleWishlist}
+                  wishlistIds={wishlistIds}
+                  onViewAll={() => handleNavigate('shop')}
+                />
+              </div>
+            } 
           />
-
-          <BrandCarousel />
-
-          {/* 2. Featured Bestsellers */}
-          <FeaturedSection
-            products={products}
-            onQuickAdd={handleQuickAdd}
-            onSelect={(p) => setSelectedProduct(p)}
-            onToggleWishlist={handleToggleWishlist}
-            wishlistIds={wishlistIds}
-            onViewAll={() => handleNavigate('shop')}
+          <Route 
+            path="/shop" 
+            element={
+              <ShopSection
+                products={products}
+                loading={loading}
+                error={error}
+                onQuickAdd={handleQuickAdd}
+                onSelectProduct={(p) => setSelectedProduct(p)}
+                onToggleWishlist={handleToggleWishlist}
+                wishlistIds={wishlistIds}
+              />
+            } 
           />
-        </div>
-
-        {/* 3. Shop Section */}
-        <ShopSection
-          products={products}
-          loading={loading}
-          error={error}
-          onQuickAdd={handleQuickAdd}
-          onSelectProduct={(p) => setSelectedProduct(p)}
-          onToggleWishlist={handleToggleWishlist}
-          wishlistIds={wishlistIds}
-        />
-
-        {/* 4. About Us Section */}
-        <AboutSection />
-
-        {/* 5. Contact Form Section */}
-        <ContactSection
-          onShowToast={(title, desc) => addToast(title, desc, 'success')}
-        />
+          <Route 
+            path="/about" 
+            element={<AboutSection />} 
+          />
+          <Route 
+            path="/contact" 
+            element={
+              <ContactSection
+                onShowToast={(title, desc) => addToast(title, desc, 'success')}
+              />
+            } 
+          />
+          <Route 
+            path="/privacy-policy" 
+            element={<PrivacyPolicyPage settings={settings} />} 
+          />
+        </Routes>
       </main>
 
-      {/* 6. Footer */}
+      {/* Footer */}
       <Footer
         onShowToast={(title, desc) => addToast(title, desc, 'success')}
         onNavigate={handleNavigate}
+        settings={settings}
       />
 
       {/* Interactive Modals & Drawers */}
@@ -308,6 +329,7 @@ export default function App() {
         onUpdateQuantity={handleUpdateCartQuantity}
         onRemoveItem={handleRemoveCartItem}
         onClearCart={handleClearCart}
+        settings={settings}
       />
 
       <WishlistDrawer

@@ -35,8 +35,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
         'Our Cairo distribution manager will reach out within 24 hours.'
       );
     } catch (err) {
-      console.error('Submission failed:', err);
-      setError('Failed to send inquiry. Please try again later.');
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -183,6 +182,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onShowToast }) =
                     {error}
                   </div>
                 )}
+
+                <div className="text-[10px] text-[#E8D6D2]/60 font-light leading-relaxed">
+                  By submitting this form, you acknowledge that the provided information will be used to respond to your enquiry in accordance with our <a href="/privacy-policy" className="text-[#C9A227] hover:underline">Privacy Policy</a>.
+                </div>
 
                 <button
                   type="submit"
