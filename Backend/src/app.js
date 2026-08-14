@@ -49,8 +49,6 @@ app.get("/", (req, res) => {
     });
 });
 
-// Serve uploaded images as static files
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
