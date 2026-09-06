@@ -24,17 +24,29 @@ app.use(helmet({
     crossOriginResourcePolicy: false, // Allow serving images cross-origin to frontend
 }));
 
-// Allow requests from the frontend specifically (not wildcard)
-const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : ["http://localhost:3000"];
+const allowedOrigins = [
+    "https://elpida-website.vercel.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    ...(process.env.FRONTEND_URL
+        ? process.env.FRONTEND_URL
+            .split(",")
+            .map((origin) => origin.trim().replace(/\/+$/, ""))
+            .filter(Boolean)
+        : [])
+];
+
 app.use(cors({
-    origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+    origin: (origin, callback) => {
+        if (!origin) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        const normalizedOrigin = origin.replace(/\/+$/, "");
+        if (allowedOrigins.includes(normalizedOrigin)) {
+            return callback(null, true);
+        }
+        const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
     },
     credentials: true
 }));
