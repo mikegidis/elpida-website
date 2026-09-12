@@ -35,6 +35,26 @@ async function updateCategory(id, { name, description }) {
   return result.rows[0] || null;
 }
 
+async function getCategoryById(id) {
+  const result = await pool.query(`
+    SELECT id, name, description
+    FROM categories
+    WHERE id = $1;
+  `, [id]);
+
+  return result.rows[0] || null;
+}
+
+async function countProductsByCategoryId(categoryId) {
+  const result = await pool.query(`
+    SELECT COUNT(*)::int AS count
+    FROM products
+    WHERE category_id = $1;
+  `, [categoryId]);
+
+  return result.rows[0].count;
+}
+
 async function deleteCategory(id) {
   const result = await pool.query(`
     DELETE FROM categories
@@ -47,7 +67,10 @@ async function deleteCategory(id) {
 
 module.exports = {
   getAllCategories,
+  getCategoryById,
+  countProductsByCategoryId,
   createCategory,
   updateCategory,
   deleteCategory,
 };
+

@@ -12,6 +12,7 @@ router.get("/", (req, res, next) => {
 
 router.post("/", requireAdminAuth, variantController.createVariant);
 router.put("/:id", requireAdminAuth, variantController.updateVariant);
+router.patch("/:id/status", requireAdminAuth, variantController.toggleVariantStatus);
 router.delete("/:id", requireAdminAuth, variantController.deleteVariant);
 
 module.exports = router;

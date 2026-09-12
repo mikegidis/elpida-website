@@ -32,7 +32,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
 
   const categories = useMemo(() => {
     const baseCategories: { id: number | 'all'; label: string }[] = [
-      { id: 'all', label: 'All Formulations' }
+      { id: 'all', label: 'All Products' }
     ];
 
     const mapped = apiCategories.map(cat => ({
@@ -176,7 +176,7 @@ export const ShopSection: React.FC<ShopSectionProps> = ({
         ) : (
           <div className="text-center py-20 bg-[#121415] rounded-3xl border border-[#E8E3D9]/10 p-8">
             <Sparkles className="w-8 h-8 text-[#6B8E23] mx-auto mb-3 opacity-60" />
-            <h3 className="font-serif-editorial text-2xl text-[#E8E3D9]">No Formulations Found</h3>
+            <h3 className="font-serif-editorial text-2xl text-[#E8E3D9]">No Products Found</h3>
             <p className="text-xs text-[#A39E93] mt-2">
               Try adjusting your search criteria or resetting filters to explore our full selection.
             </p>
