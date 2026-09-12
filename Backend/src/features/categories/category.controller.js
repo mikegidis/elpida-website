@@ -85,21 +85,49 @@ async function updateCategory(req, res) {
 
 async function deleteCategory(req, res) {
     try {
-        const deleted = await categoryModel.deleteCategory(req.params.id);
+        const categoryId = req.params.id;
+
+        const category = await categoryModel.getCategoryById(categoryId);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: "Category not found",
+            });
+        }
+
+        const productCount = await categoryModel.countProductsByCategoryId(categoryId);
+        if (productCount > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete this category because it contains products. Please reassign or delete the products first.",
+            });
+        }
+
+        const deleted = await categoryModel.deleteCategory(categoryId);
 
         if (!deleted) {
             return res.status(404).json({
+                success: false,
                 message: "Category not found",
             });
         }
 
         return res.json({
+            success: true,
             message: "Category deleted successfully",
         });
     } catch (error) {
         console.error(error);
 
+        if (error.code === "23503") {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete this category because it contains products.",
+            });
+        }
+
         return res.status(500).json({
+            success: false,
             message: "Failed to delete category",
         });
     }

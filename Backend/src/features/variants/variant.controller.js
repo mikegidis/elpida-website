@@ -118,9 +118,64 @@ async function updateVariant(req, res) {
     }
 }
 
+async function toggleVariantStatus(req, res) {
+    try {
+        const variantId = req.params.id;
+        const { is_active } = req.body;
+
+        if (typeof is_active !== "boolean") {
+            return res.status(400).json({
+                success: false,
+                message: "A boolean 'is_active' field is required.",
+            });
+        }
+
+        const updated = await variantModel.setVariantStatus(variantId, is_active);
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: "Variant not found",
+            });
+        }
+
+        return res.json({
+            success: true,
+            data: updated,
+            message: `Variant ${is_active ? "activated" : "archived"} successfully`,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update variant status",
+        });
+    }
+}
+
 async function deleteVariant(req, res) {
     try {
-        const deleted = await variantModel.deleteVariant(req.params.id);
+        const variantId = req.params.id;
+
+        const variant = await variantModel.getVariantById(variantId);
+        if (!variant) {
+            return res.status(404).json({
+                success: false,
+                message: "Variant not found",
+            });
+        }
+
+        const orderCount = await variantModel.countOrdersByVariantId(variantId);
+        if (orderCount > 0) {
+            return res.status(400).json({
+                success: false,
+                referencedByOrders: true,
+                orderCount,
+                message: "Cannot delete this variant because it is referenced by existing order data. Please archive it instead.",
+            });
+        }
+
+        const deleted = await variantModel.deleteVariant(variantId);
 
         if (!deleted) {
             return res.status(404).json({
@@ -136,6 +191,14 @@ async function deleteVariant(req, res) {
     } catch (error) {
         console.error(error);
 
+        if (error.code === "23503") {
+            return res.status(400).json({
+                success: false,
+                referencedByOrders: true,
+                message: "Cannot delete this variant because it is referenced by existing order data. Please archive it instead.",
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Failed to delete variant",
@@ -147,5 +210,6 @@ module.exports = {
     getVariants,
     createVariant,
     updateVariant,
+    toggleVariantStatus,
     deleteVariant,
 };

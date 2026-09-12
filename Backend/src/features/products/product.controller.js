@@ -116,7 +116,25 @@ async function updateProduct(req, res) {
 
 async function deleteProduct(req, res) {
     try {
-        const deleted = await productModel.deleteProduct(req.params.id);
+        const productId = req.params.id;
+
+        const product = await productModel.getProductById(productId);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        const orderCount = await productModel.countOrdersByProductId(productId);
+        if (orderCount > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete this product because it is referenced by existing order data.",
+            });
+        }
+
+        const deleted = await productModel.deleteProduct(productId);
 
         if (!deleted) {
             return res.status(404).json({
@@ -131,6 +149,13 @@ async function deleteProduct(req, res) {
         });
     } catch (error) {
         console.error(error);
+
+        if (error.code === "23503") {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete this product because it is referenced by existing order data.",
+            });
+        }
 
         return res.status(500).json({
             success: false,

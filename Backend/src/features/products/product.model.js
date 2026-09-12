@@ -79,21 +79,51 @@ async function updateProduct(id, { name, description, categoryId, imageUrl, isAc
     return result.rows[0] || null;
 }
 
-async function deleteProduct(id) {
+async function countOrdersByProductId(productId) {
     const result = await pool.query(`
-        DELETE FROM products
-        WHERE id = $1
-        RETURNING id, image_url;
-    `, [id]);
+        SELECT COUNT(oi.id)::int AS count
+        FROM order_items oi
+        INNER JOIN product_variants pv ON oi.product_variant_id = pv.id
+        WHERE pv.product_id = $1;
+    `, [productId]);
 
-    return result.rows[0] || null;
+    return result.rows[0].count;
+}
+
+async function deleteProduct(id) {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        // Delete variants of this product first (verified to have no orders)
+        await client.query(`
+            DELETE FROM product_variants
+            WHERE product_id = $1;
+        `, [id]);
+
+        const result = await client.query(`
+            DELETE FROM products
+            WHERE id = $1
+            RETURNING id, image_url;
+        `, [id]);
+
+        await client.query("COMMIT");
+        return result.rows[0] || null;
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 
 module.exports = {
     getAllActiveProducts,
     getAllProductsForAdmin,
     getProductById,
+    countOrdersByProductId,
     createProduct,
     updateProduct,
     deleteProduct,
 };
+

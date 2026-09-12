@@ -8,6 +8,7 @@ export interface AdminVariant {
   price: number;
   stock_quantity: number;
   is_active: boolean;
+  order_count?: number;
 }
 
 export interface VariantInput {
@@ -36,6 +37,15 @@ export async function updateVariant(id: number, variant: VariantInput): Promise<
   const response = await apiFetch<{ success: boolean; data: AdminVariant }>(`/variants/${id}`, {
     method: 'PUT',
     body: JSON.stringify(variant),
+  });
+
+  return response.data;
+}
+
+export async function updateVariantStatus(id: number, is_active: boolean): Promise<AdminVariant> {
+  const response = await apiFetch<{ success: boolean; data: AdminVariant }>(`/variants/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active }),
   });
 
   return response.data;
