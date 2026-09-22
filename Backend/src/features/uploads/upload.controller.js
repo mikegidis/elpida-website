@@ -43,7 +43,9 @@ async function uploadImage(req, res) {
         const uploadStream = () => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
-                    { folder: "elpida/products" },
+    {
+        folder: process.env.CLOUDINARY_FOLDER,
+    },
                     (error, result) => {
                         if (result) {
                             resolve(result);
