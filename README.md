@@ -307,15 +307,31 @@ elpida-website/
 - npm
 - PostgreSQL
 
+
 ### Backend
+
+Create the required local environment configuration using `.env.example` as the reference. Configure the PostgreSQL connection for the database you want to use.
+
+Install the backend dependencies:
 
 ```bash
 cd Backend
 npm install
-npm run dev
 ```
 
-Create the required local environment configuration using `.env.example` as the reference.
+Initialize the database schema:
+
+```bash
+npm run migrate
+```
+
+The migration runner creates the required application tables and records applied migrations in the `schema_migrations` table. On subsequent runs, migrations that have already been applied are skipped.
+
+Start the backend development server:
+
+```bash
+npm run dev
+```
 
 ### Frontend
 
