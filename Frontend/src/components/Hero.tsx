@@ -54,7 +54,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onQuizClick }) => {
           transition={{ duration: 1, delay: 0.4 }}
           className="font-serif-editorial text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-light tracking-tight text-[#E8D6D2] leading-[0.95] max-w-4xl"
         >
-          Elpida in <br className="hidden sm:inline" />
+          Elpida Wholesale <br className="hidden sm:inline" />
           <span className="italic font-normal text-[#C9A227]">Every Drop</span>
         </motion.h1>
 
@@ -121,4 +121,5 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onQuizClick }) => {
     </section>
   );
 };
+
 
